@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using MihaZupan;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,24 +23,9 @@ namespace store_service.Services
         public TelegramBot(IConfiguration configuration, ILogger<TelegramBot> logger)
         {
             _logger = logger;
-            var proxy = new HttpToSocks5Proxy(
-                configuration["Store:BotTelegram:ProxyServer"],
-                int.Parse(configuration["Store:BotTelegram:ProxyPort"]));
-            botClient = new TelegramBotClient(configuration["Store:BotTelegram:Token"], proxy);
-            //botClient.OnMessage += Bot_OnMessage;
-            //botClient.StartReceiving();
+            botClient = new TelegramBotClient(configuration["Store:BotTelegram:Token"]);
 
             ChatId = configuration["Store:BotTelegram:NotifyChatId"];
-        }
-        async void Bot_OnMessage(object sender, MessageEventArgs e)
-        {
-            if (e.Message.Text != null)
-            {
-                await botClient.SendTextMessageAsync(
-                  chatId: e.Message.Chat,
-                  text: "Pong:\n" + e.Message.Text
-                );
-            }
         }
         
         public async Task<bool> Notify(string message)

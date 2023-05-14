@@ -132,24 +132,30 @@ namespace store_service.Controllers
         {
             var claims = new List<Claim> {
                     new Claim(ClaimTypes.Name, userId),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 };
             if (roles != null)
             {
                 foreach (var role in roles)
-                    claims.Add(new Claim("Role", role));
+                    claims.Add(new Claim(ClaimTypes.Role, role));
             }
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JwtBearer:JwtSecurityKey"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
 
-            var token = new JwtSecurityToken(
-                issuer: _config["JwtBearer:ValidIssuer"],
-                audience: _config["JwtBearer:ValidAudience"],
-                claims: claims,
-                expires: validThrough,
-                signingCredentials: creds
-            );
+            var tokenDescriptor = new SecurityTokenDescriptor()
+            {
+                Subject = new ClaimsIdentity(claims),
+                Issuer = _config["JwtBearer:ValidIssuer"],
+                Audience = _config["JwtBearer:ValidAudience"],
+                SigningCredentials = creds,                
+                Expires= validThrough                
+            };
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var jwtToken = tokenHandler.WriteToken(token);
+
+            return jwtToken;
         }
         private async Task<bool> IsValidCaptcha(string captchaFormToken)
         {
@@ -276,7 +282,7 @@ namespace store_service.Controllers
             IActionResult result;
             if (user != null)
             {
-                await MergeCartsIfCan(request, user);
+                //await MergeCartsIfCan(request, user);
 
                 var validThrough = GetValidThrough(request.RememberMe);
                 var token = CreateJwtToken(validThrough, user.Id.ToString(), WithInheritRoles(user.RegisteredUser.Role));

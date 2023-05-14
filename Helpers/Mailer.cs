@@ -27,11 +27,12 @@ namespace store_service.Helpers
             _config = configuration;
             _logger = logger;
 
-            Host = _config["Store:Email:SmtpServer"];
-            Port = int.Parse(_config["Store:Email:SmtpPort"]);
-            Login = _config["Store:Email:SmtpLogin"];
-            Password = _config["Store:Email:SmtpPassword"];
-            NotifyMail = _config["Store:Email:Notify"];
+//TODO update
+            // Host = _config["Store:Email:SmtpServer"];
+            // Port = int.Parse(_config["Store:Email:SmtpPort"]);
+            // Login = _config["Store:Email:SmtpLogin"];
+            // Password = _config["Store:Email:SmtpPassword"];
+            // NotifyMail = _config["Store:Email:Notify"];
         }
         public async Task<bool> Send(string toEmail, string subject, string body)
         {

@@ -23,10 +23,9 @@ namespace store_service.Helpers
 
         public static async Task CreateThumbnails(Model.Web.ImageDesc result, Microsoft.AspNetCore.Http.IFormFile file, IFilesRepository Repository)
         {
-
             using (var stream = file.OpenReadStream())
             {
-                using (var currentImage = Image.Load(stream, new JpegDecoder()))
+                using (var currentImage = Image.Load(stream))
                 {
                     foreach (var t in ThumbTable)
                     {
@@ -94,7 +93,7 @@ namespace store_service.Helpers
                             {
                                 currentImage = new Tuple<int, Image>(
                                     -1,
-                                    Image.Load(imageStream, new JpegDecoder())
+                                    Image.Load(imageStream)
                                     );
                             }
                         }
@@ -106,7 +105,7 @@ namespace store_service.Helpers
                             {
                                 currentImage = new Tuple<int, Image>(
                                     i - 1,
-                                    Image.Load(imageStream, new JpegDecoder())
+                                    Image.Load(imageStream)
                                     );
                             }
                         }

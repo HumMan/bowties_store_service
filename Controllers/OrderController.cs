@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -38,6 +39,13 @@ namespace store_service.Controllers
         public string OrderId { get; set; }
         public Model.OrderStatus From { get; set; }
         public Model.OrderStatus To { get; set; }
+    }
+    public class GetPostalInfoResult
+    {
+        public string region{ get;set;}
+        public string city{ get;set;}
+        public string region_num{ get;set;}
+        public string @string{ get;set;}
     }
 
     [Authorize()]
@@ -90,7 +98,7 @@ namespace store_service.Controllers
         }
         private bool CheckRole(string role)
         {
-            var claims = HttpContext.User.Claims.Where(i => i.Type == "Role");
+            var claims = HttpContext.User.Claims.Where(i => i.Type == ClaimTypes.Role);
             return claims.Any(i => i.Value == role);
         }
         [Authorize(Roles = "Manager")]
@@ -267,13 +275,13 @@ namespace store_service.Controllers
         }
         [AllowAnonymous] // тут в авторизации смысла нет, т.к. кэшируется в nginx
         [HttpGet("postalinfo")]
-        public async Task<IActionResult> GetPostalInfo(int i)
+        public async Task<GetPostalInfoResult> GetPostalInfo(int i)
         {
             using (var httpClient = new HttpClient())
             {
                 var response = await httpClient.GetAsync("https://api.print-post.com/api/index/v2/?index=" + i);
                 var result = await response.Content.ReadAsStringAsync();
-                return Ok(JsonConvert.DeserializeObject(response.Content.ReadAsStringAsync().Result));
+                return JsonConvert.DeserializeObject<GetPostalInfoResult>(result);
             }
         }
     }

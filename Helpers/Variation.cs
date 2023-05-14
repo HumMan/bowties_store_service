@@ -108,8 +108,23 @@ namespace store_service.Helpers
             }
             return result.ToString();
         }
+        //TODO заменить массивы int[] на декартово
+        public static IEnumerable<IEnumerable<T>> CartesianProduct<T>(IEnumerable<IEnumerable<T>> sequences) 
+        { 
+            IEnumerable<IEnumerable<T>> result = new[] { Enumerable.Empty<T>() }; 
+            foreach(var sequence in sequences) 
+            { 
+                var s = sequence;
+                result =  
+                    from seq in result 
+                    from item in s 
+                    select seq.Concat(new[] {item}); 
+            } 
+            return result; 
+        } 
         public static List<int[]> GenerateVariations(Model.Data.Group group)
-        {            
+        {         
+               
             var index = new int[group.VariationParameters.Count];
             var lengths = new int[index.Length];
             for (int i = 0; i < lengths.Length; i++) {
