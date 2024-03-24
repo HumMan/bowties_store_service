@@ -20,16 +20,26 @@ namespace store_service.Services
         private readonly ITelegramBotClient botClient;
         private readonly ILogger<TelegramBot> _logger;
         private readonly string ChatId;
+        private readonly bool NotifyEnabled;
         public TelegramBot(IConfiguration configuration, ILogger<TelegramBot> logger)
         {
             _logger = logger;
-            botClient = new TelegramBotClient(configuration["Store:BotTelegram:Token"]);
 
-            ChatId = configuration["Store:BotTelegram:NotifyChatId"];
+            NotifyEnabled = configuration["Store:BotTelegram:NotifyEnabled"]=="true";
+            if (NotifyEnabled)
+            {
+                botClient = new TelegramBotClient(configuration["Store:BotTelegram:Token"]);
+
+                ChatId = configuration["Store:BotTelegram:NotifyChatId"];
+            }
         }
         
         public async Task<bool> Notify(string message)
         {
+            if (!NotifyEnabled)
+            {
+                return true;
+            }
             try
             {
                 var result = await botClient.SendTextMessageAsync(ChatId, message, parseMode: ParseMode.Html);

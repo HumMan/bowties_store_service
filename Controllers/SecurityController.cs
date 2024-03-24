@@ -159,17 +159,25 @@ namespace store_service.Controllers
         }
         private async Task<bool> IsValidCaptcha(string captchaFormToken)
         {
-            using (var httpClient = new HttpClient())
+            if (_config["Store:GoogleRecaptchaValidate"] == "true")
             {
-                var content = new FormUrlEncodedContent(new[]{
+
+                using (var httpClient = new HttpClient())
+                {
+                    var content = new FormUrlEncodedContent(new[]{
                     new KeyValuePair<string,string>("secret",_config["Store:GoogleRecaptchaSecret"]),
                     new KeyValuePair<string,string>("response",captchaFormToken),
                 });
-                var response = await httpClient.PostAsync("https://www.google.com/recaptcha/api/siteverify", content);
+                    var response = await httpClient.PostAsync("https://www.google.com/recaptcha/api/siteverify", content);
 
-                var captchaResultAsString = await response.Content.ReadAsStringAsync();
-                var captchaResult = JsonConvert.DeserializeObject<TGoogleRecaptchaResult>(captchaResultAsString);
-                return captchaResult.success;
+                    var captchaResultAsString = await response.Content.ReadAsStringAsync();
+                    var captchaResult = JsonConvert.DeserializeObject<TGoogleRecaptchaResult>(captchaResultAsString);
+                    return captchaResult.success;
+                }
+            }
+            else
+            {
+                return true;
             }
         }
         private async Task MergeCartsIfCan(TokenRequest request, Model.Data.User user)

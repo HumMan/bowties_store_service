@@ -21,21 +21,28 @@ namespace store_service.Helpers
         private readonly int Port;
         private readonly string Login;
         private readonly string Password;
-        private readonly string NotifyMail;
+        private readonly bool NotifyEnabled;
         public Mailer(IConfiguration configuration, ILogger<Mailer> logger)
         {
             _config = configuration;
             _logger = logger;
 
-//TODO update
-            // Host = _config["Store:Email:SmtpServer"];
-            // Port = int.Parse(_config["Store:Email:SmtpPort"]);
-            // Login = _config["Store:Email:SmtpLogin"];
-            // Password = _config["Store:Email:SmtpPassword"];
-            // NotifyMail = _config["Store:Email:Notify"];
+            NotifyEnabled = _config["Store:Email:NotifyEnabled"]=="true";
+
+            if (NotifyEnabled)
+            {
+                Host = _config["Store:Email:SmtpServer"];
+                Port = int.Parse(_config["Store:Email:SmtpPort"]);
+                Login = _config["Store:Email:SmtpLogin"];
+                Password = _config["Store:Email:SmtpPassword"];
+            }
         }
         public async Task<bool> Send(string toEmail, string subject, string body)
         {
+            if (!NotifyEnabled)
+            {
+                return true;
+            }
             try
             {
                 using (var smtpClient = new SmtpClient
